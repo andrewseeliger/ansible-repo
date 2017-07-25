@@ -1,4 +1,0 @@
----
-- hosts: appsense_sql
-  roles:
-   - appsense_sql
