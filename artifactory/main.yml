@@ -1,0 +1,51 @@
+---
+- hosts: art
+  vars:
+   ansible_ssh_user: root
+   ansible_ssh_pass: Welcome1
+  remote_user: root
+  tasks:
+
+  - name: allow all ports via iptables
+    iptables:
+     chain: INPUT
+     jump: ACCEPT
+  
+  - name: download jdk 8.141 to /tmp/
+    get_url: 
+     url: http://download.oracle.com/otn-pub/java/jdk/8u141-b15/336fa29ff2bb4ef291e347e091f7f4a7/jdk-8u141-linux-x64.rpm
+     dest: /tmp/jdk-8u141-linux-x64.rpm
+     headers: "Cookie:' gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie'" 
+     validate_certs: no 
+     checksum: sha256:c3586f6ad0cb6cf4a00a0610fc50004370820b6021c58642de2873db99e9a6c9
+
+  - name: install jdk 8.141
+    yum:
+     name: /tmp/jdk-8u141-linux-x64.rpm
+     state: present
+
+  - name: set JAVA_HOME
+    copy:
+     content: export JAVA_HOME=/usr/java/jdk1.8.0_141/jre/bin/java
+     dest: /etc/profile.d/java_home.sh
+     force: no
+
+  - name: set jfrog repo
+    yum_repository:
+     name: bintray--jfrog-artifactory-rpms
+     description: bintray--jfrog-artifactory-rpms - packages by  from Bintray
+     baseurl: http://jfrog.bintray.com/artifactory-rpms 
+     gpgcheck: no
+     repo_gpgcheck: no
+     enabled: yes     
+
+  - name: install artifcatory from jfrog repo
+    yum:
+     name: jfrog-artifactory-oss
+     state: present
+
+  - name: start artifactory service
+    service: 
+     name: artifactory
+     state: started
+
