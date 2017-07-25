@@ -1,0 +1,4 @@
+---
+win_domain_admin_user: lab01\Administrator
+win_domain_admin_password: Welcome1
+
